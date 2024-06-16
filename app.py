@@ -2,10 +2,22 @@ import dash
 from dash import html, dcc
 from dash.dependencies import Input, Output
 import pandas as pd
+import sqlite3
 import plotly.express as px
 
+# Establish a connection to the SQLite database
+conn = sqlite3.connect('database_kryteria_after_preprocesing.db')
+
+# Read the entire table into a DataFrame
+df= pd.read_sql_query("SELECT * FROM kryteria", conn)
+
+# Close the connection
+conn.close()
+
 # Load the data from the CSV file
-df = pd.read_csv('data_test.csv')
+#df = pd.read_csv('data_test.csv')
+
+
 
 # Initialize the Dash app
 app = dash.Dash(__name__)
@@ -33,10 +45,18 @@ table_layout = html.Div([
         options=[{'label': i, 'value': i} for i in df['nazwa_ostoi'].unique()],
         multi=True
     ),
+    html.Br(),
     html.Label("Wybierz nazwę polską:"),
     dcc.Dropdown(
         id='nazwa_polska_dropdown',
         options=[{'label': i, 'value': i} for i in df['nazwa_polska'].unique()],
+        multi=True
+    ),
+    html.Br(),
+    html.Label("Wybierz nazwę polską:"),
+    dcc.Dropdown(
+        id='rok_dropdown',
+        options=[i for i in range(1990, 2020)],
         multi=True
     ),
     html.Div(id='tabela_div'),
@@ -105,9 +125,10 @@ def update_bar(selected_nazwa_ostoi, selected_nazwa_polska):
 @app.callback(
     Output('tabela_div', 'children'),
     [Input('nazwa_ostoi_dropdown', 'value'),
-     Input('nazwa_polska_dropdown', 'value')]
+     Input('nazwa_polska_dropdown', 'value'),
+     Input('rok_dropdown', 'value')]
 )
-def update_table(selected_nazwa_ostoi, selected_nazwa_polska):
+def update_table(selected_nazwa_ostoi, selected_nazwa_polska, selected_rok):
     filtered_df = df.copy()
     if selected_nazwa_ostoi:
         filtered_df = filtered_df[filtered_df['nazwa_ostoi'].isin(selected_nazwa_ostoi)]
@@ -115,11 +136,17 @@ def update_table(selected_nazwa_ostoi, selected_nazwa_polska):
     if selected_nazwa_polska:
         filtered_df = filtered_df[filtered_df['nazwa_polska'].isin(selected_nazwa_polska)]
 
+    if selected_rok:
+        filtered_df = filtered_df[filtered_df.apply(
+        lambda row: any((row['rok_start'] <= year) &
+        (row['rok_end'] >= year) for year in selected_rok), axis=1)]
+
     return html.Div([
         html.H2("Wyniki filtrowania:"),
         dash.dash_table.DataTable(
             data=filtered_df.to_dict('records'),
-            columns=[{'name': i, 'id': i} for i in filtered_df.columns],
+            # Show first 13 columns, skip rok_poczatek i rok_end
+            columns=[{'name': i, 'id': i} for i in filtered_df.columns[:13]],
             style_table={'overflowX': 'auto'},
             style_header={
                 'backgroundColor': 'rgb(230, 230, 230)',
