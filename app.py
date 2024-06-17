@@ -4,6 +4,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import sqlite3
 import plotly.express as px
+import plotly.graph_objects as go
 
 # Establish a connection to the SQLite database
 conn = sqlite3.connect('database_kryteria_after_preprocesing.db')
@@ -74,13 +75,26 @@ plot_layout = html.Div([
     ),
     html.Label('Wybierz nazwę ptaka:'),
     dcc.Dropdown(
-        id='nazwa_polska_dropdown_bar_plot',
-        options=[{'label': i, 'value': i} for i in df['nazwa_polska'].unique()],
-        value='Bielik'
+        id='nazwa_polska_dropdown_bar_plot'
+    ),
+    html.Label('Wybierz status:'),
+    dcc.Dropdown(
+        id='status_dropdown_bar_plot',
+        options=[{'label': i, 'value': i} for i in df['status'].unique()],
+        value='M'
     ),
     dcc.Graph(id='bar-graph'),
     dcc.Link('Powrót do menu', href='/')
 ])
+
+@app.callback(
+    Output('nazwa_polska_dropdown_bar_plot', 'options'),
+    Input('nazwa_ostoi_dropdown_bar_plot', 'value')
+)
+def update_dropdown_nazwa_ptaka_wykres(selected_ostoja):
+    if selected_ostoja is None:
+        return []
+    return [{'label': i, 'value': i} for i in df['nazwa_polska'][df['nazwa_ostoi'] == selected_ostoja].unique()]
 
 # Main layout
 app.layout = menu_layout
@@ -100,9 +114,10 @@ def display_page(pathname):
 @app.callback(
     Output('bar-graph', 'figure'),
     [Input('nazwa_ostoi_dropdown_bar_plot', 'value'),
-     Input('nazwa_polska_dropdown_bar_plot', 'value')]
+     Input('nazwa_polska_dropdown_bar_plot', 'value'),
+     Input('status_dropdown_bar_plot', 'value')]
 )
-def update_bar(selected_nazwa_ostoi, selected_nazwa_polska):
+def update_bar(selected_nazwa_ostoi, selected_nazwa_polska, selected_status):
     filtered_df = df.copy()
     if selected_nazwa_ostoi:
         filtered_df = filtered_df[filtered_df['nazwa_ostoi'].isin([selected_nazwa_ostoi])]
@@ -110,13 +125,18 @@ def update_bar(selected_nazwa_ostoi, selected_nazwa_polska):
     if selected_nazwa_polska:
         filtered_df = filtered_df[filtered_df['nazwa_polska'].isin([selected_nazwa_polska])]
 
-    fig = px.bar(filtered_df, x="rok", y="liczba_par_min")
+    if selected_status:
+        filtered_df = filtered_df[filtered_df['status'].isin([selected_status])]
 
+    fig = go.Figure()
+
+    fig.add_trace(go.Bar(x=filtered_df["rok"], y=filtered_df["liczba_par_min"], name="Liczba par minimum"))
+    fig.add_trace(go.Bar(x=filtered_df["rok"], y=filtered_df["liczba_par_max"], name="Liczba par maksimum"))
     # Customize x-axis title and font size
     fig.update_layout(
         xaxis_title="Rok",
         xaxis=dict(title_font=dict(size=18)),
-        yaxis_title="Liczba Par Min",
+        yaxis_title="Liczba Par",
         yaxis=dict(title_font=dict(size=18))
     )
     return fig
