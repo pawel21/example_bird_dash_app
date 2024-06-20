@@ -15,10 +15,6 @@ df= pd.read_sql_query("SELECT * FROM kryteria", conn)
 # Close the connection
 conn.close()
 
-# Load the data from the CSV file
-#df = pd.read_csv('data_test.csv')
-
-
 
 # Initialize the Dash app
 app = dash.Dash(__name__)
@@ -79,9 +75,7 @@ plot_layout = html.Div([
     ),
     html.Label('Wybierz status:'),
     dcc.Dropdown(
-        id='status_dropdown_bar_plot',
-        options=[{'label': i, 'value': i} for i in df['status'].unique()],
-        value='M'
+        id='status_dropdown_bar_plot'
     ),
     dcc.Graph(id='bar-graph'),
     dcc.Link('Powrót do menu', href='/')
@@ -95,6 +89,16 @@ def update_dropdown_nazwa_ptaka_wykres(selected_ostoja):
     if selected_ostoja is None:
         return []
     return [{'label': i, 'value': i} for i in df['nazwa_polska'][df['nazwa_ostoi'] == selected_ostoja].unique()]
+
+@app.callback(
+    Output('status_dropdown_bar_plot', 'options'),
+    [Input('nazwa_ostoi_dropdown_bar_plot', 'value'),
+    Input('nazwa_polska_dropdown_bar_plot', 'value')]
+)
+def update_dropdown_status_ptaka_wykres(selected_ostoja, selected_nazwa_polska):
+    if selected_ostoja is None:
+        return []
+    return [{'label': i, 'value': i} for i in df['status'][(df['nazwa_ostoi'] == selected_ostoja) & (df['nazwa_polska'] == selected_nazwa_polska)].unique()]
 
 # Main layout
 app.layout = menu_layout
