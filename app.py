@@ -29,6 +29,7 @@ menu_layout = html.Div([
     html.Br(),
     dcc.Link('Wykres', href='/plot'),
     html.Br(),
+    dcc.Link('Mapa', href='/map'),
     dcc.Location(id='url', refresh=False),
     html.Div(id='page-content')
 ])
@@ -81,6 +82,18 @@ plot_layout = html.Div([
     dcc.Link('Powrót do menu', href='/')
 ])
 
+map_layout = html.Div([
+    html.H1("Mapa"),
+
+    html.Label('Wybierz nazwę ptaka:'),
+    dcc.Dropdown(
+        id='nazwa_polska_map',
+        options=[{'label': i, 'value': i} for i in df['nazwa_polska'].unique()]
+    ),
+    dcc.Graph(id='map-graph'),
+    dcc.Link('Powrót do menu', href='/')
+])
+
 @app.callback(
     Output('nazwa_polska_dropdown_bar_plot', 'options'),
     Input('nazwa_ostoi_dropdown_bar_plot', 'value')
@@ -111,6 +124,8 @@ def display_page(pathname):
         return table_layout
     elif pathname == '/plot':
         return plot_layout
+    elif pathname == '/map':
+        return map_layout
     else:
         return html.Div("Wybierz stronę z menu powyżej.")
 
@@ -182,6 +197,39 @@ def update_table(selected_nazwa_ostoi, selected_nazwa_polska, selected_rok):
             }
         )
     ])
+
+# Callback for updating the bar graph
+@app.callback(
+    Output('map-graph', 'figure'),
+     Input('nazwa_polska_map', 'value')
+)
+def update_map(selected_nazwa_polska):
+    filtered_df = df.copy()
+
+    if selected_nazwa_polska:
+        filtered_df = filtered_df[filtered_df['nazwa_polska'].isin([selected_nazwa_polska])]
+
+    print(filtered_df)
+
+    # Przykładowe dane
+    df_map_example = pd.DataFrame({
+        'RA': [52.1, 52.2, 52.3],
+        'DEC': [21.0, 21.1, 21.2],
+        'index': ['Point 1', 'Point 2', 'Point 3']
+    })
+
+    # Tworzenie wykresu scatter mapbox
+    fig = px.scatter_mapbox(
+        df_map_example ,
+        lat="RA",
+        lon="DEC",
+        hover_name="index",
+        zoom=6,
+        center={"lat": 52.237049, "lon": 21.017532},
+        mapbox_style="open-street-map"
+    )
+
+    return fig
 
 if __name__ == '__main__':
     app.run_server(debug=True, host='0.0.0.0', port=8050)
