@@ -6,6 +6,9 @@ import sqlite3
 import plotly.express as px
 import plotly.graph_objects as go
 
+from maps import update_map
+
+
 # Establish a connection to the SQLite database
 conn = sqlite3.connect('database_kryteria_after_preprocesing.db')
 
@@ -19,6 +22,8 @@ conn.close()
 # Initialize the Dash app
 app = dash.Dash(__name__)
 app.config.suppress_callback_exceptions=True
+
+
 
 # Layout for the main menu
 menu_layout = html.Div([
@@ -82,7 +87,16 @@ plot_layout = html.Div([
     dcc.Link('Powrót do menu', href='/')
 ])
 
-map_layout = html.Div([
+map_layout = html.Div(
+    style={
+        #'display': 'flex',
+        'justify-content': 'center',
+        'align-items': 'center',
+        'height': '100vh',
+        'padding': 10, 'flex': 10
+        #'flex-direction': 'column'
+    },
+    children = [
     html.H1("Mapa"),
 
     html.Label('Wybierz nazwę ptaka:'),
@@ -90,7 +104,9 @@ map_layout = html.Div([
         id='nazwa_polska_map',
         options=[{'label': i, 'value': i} for i in df['nazwa_polska'].unique()]
     ),
-    dcc.Graph(id='map-graph'),
+    dcc.Graph(id='map-graph',
+             style={'width': '60%', 'height': '95vh', 'display': 'inline-block'}),
+
     dcc.Link('Powrót do menu', href='/')
 ])
 
@@ -198,38 +214,8 @@ def update_table(selected_nazwa_ostoi, selected_nazwa_polska, selected_rok):
         )
     ])
 
-# Callback for updating the bar graph
-@app.callback(
-    Output('map-graph', 'figure'),
-     Input('nazwa_polska_map', 'value')
-)
-def update_map(selected_nazwa_polska):
-    filtered_df = df.copy()
 
-    if selected_nazwa_polska:
-        filtered_df = filtered_df[filtered_df['nazwa_polska'].isin([selected_nazwa_polska])]
 
-    print(filtered_df)
-
-    # Przykładowe dane
-    df_map_example = pd.DataFrame({
-        'RA': [52.1, 52.2, 52.3],
-        'DEC': [21.0, 21.1, 21.2],
-        'index': ['Point 1', 'Point 2', 'Point 3']
-    })
-
-    # Tworzenie wykresu scatter mapbox
-    fig = px.scatter_mapbox(
-        df_map_example ,
-        lat="RA",
-        lon="DEC",
-        hover_name="index",
-        zoom=6,
-        center={"lat": 52.237049, "lon": 21.017532},
-        mapbox_style="open-street-map"
-    )
-
-    return fig
 
 if __name__ == '__main__':
     app.run_server(debug=True, host='0.0.0.0', port=8050)
