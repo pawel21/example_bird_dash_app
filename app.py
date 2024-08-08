@@ -14,6 +14,7 @@ conn = sqlite3.connect('database_kryteria_after_preprocesing.db')
 
 # Read the entire table into a DataFrame
 df= pd.read_sql_query("SELECT * FROM kryteria", conn)
+df_mapa_test = pd.read_csv("mapa_test_IBA.csv")
 
 # Close the connection
 conn.close()
@@ -102,7 +103,17 @@ map_layout = html.Div(
     html.Label('Wybierz nazwę ptaka:'),
     dcc.Dropdown(
         id='nazwa_polska_map',
-        options=[{'label': i, 'value': i} for i in df['nazwa_polska'].unique()]
+        options=[{'label': i, 'value': i} for i in df_mapa_test['nazwa_polska'].unique()]
+    ),
+    html.Label('Wybierz status:'),
+    dcc.Dropdown(
+        id='status_map',
+        options=[{'label': i, 'value': i} for i in df_mapa_test['status'].unique()]
+    ),
+    html.Label('Wybierz rok:'),
+    dcc.Dropdown(
+        id='rok_map',
+        options=[i for i in range(1990, 2020)]
     ),
     dcc.Graph(id='map-graph',
              style={'width': '60%', 'height': '95vh', 'display': 'inline-block'}),
