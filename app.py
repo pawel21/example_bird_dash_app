@@ -90,35 +90,40 @@ plot_layout = html.Div([
 
 map_layout = html.Div(
     style={
-        #'display': 'flex',
+        'display': 'flex',
         'justify-content': 'center',
         'align-items': 'center',
         'height': '100vh',
-        'padding': 10, 'flex': 10
-        #'flex-direction': 'column'
+        'padding': 20, 'flex': 20,
+        'flex-direction': 'column'
     },
     children = [
-    html.H1("Mapa"),
+        html.H1("Mapa"),
 
-    html.Label('Wybierz nazwę ptaka:'),
-    dcc.Dropdown(
-        id='nazwa_polska_map',
-        options=[{'label': i, 'value': i} for i in df_mapa_test['nazwa_polska'].unique()]
-    ),
-    html.Label('Wybierz status:'),
-    dcc.Dropdown(
-        id='status_map',
-        options=[{'label': i, 'value': i} for i in df_mapa_test['status'].unique()]
-    ),
-    html.Label('Wybierz rok:'),
-    dcc.Dropdown(
-        id='rok_map',
-        options=[i for i in range(1990, 2020)]
-    ),
-    dcc.Graph(id='map-graph',
-             style={'width': '60%', 'height': '95vh', 'display': 'inline-block'}),
-
-    dcc.Link('Powrót do menu', href='/')
+        html.Label('Wybierz nazwę ptaka:'),
+        dcc.Dropdown(
+            id='nazwa_polska_map',
+            options=[{'label': i, 'value': i} for i in df_mapa_test['nazwa_polska'].unique()],
+            style={'width': '60%', 'margin': '5px auto'}
+        ),
+        html.Label('Wybierz status:'),
+        dcc.Dropdown(
+            id='status_map',
+            options=[{'label': i, 'value': i} for i in df_mapa_test['status'].unique()],
+            style={'width': '60%', 'margin': '5px auto'}
+        ),
+        html.Label('Wybierz rok:'),
+        dcc.Dropdown(
+            id='rok_map',
+            options=[i for i in range(1990, 2020)],
+            style={'width': '60%', 'margin': '5px auto'}
+        ),
+        dcc.Graph(id='map-graph',
+                 style={'width': '60%', 'height': '50vh'}),
+        html.Br(),
+        html.Div(id='tabela_mapa',
+                  style={'width': '60%', 'height': '25vh', 'overflowY': 'scroll', 'margin': '10px auto'}),
+        dcc.Link('Powrót do menu', href='/')
 ])
 
 @app.callback(
