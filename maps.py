@@ -23,10 +23,11 @@ def foo():
     Output('map-graph', 'figure'),
      [Input('nazwa_polska_map', 'value'),
       Input('status_map', 'value'),
-      Input("rok_map", 'value')
+      Input("rok_map", 'value'),
+      Input("mod_map", 'value')
      ]
 )
-def update_map(selected_nazwa_polska, selected_status, selected_rok):
+def update_map(selected_nazwa_polska, selected_status, selected_rok, selected_mod):
 
     filtered_df = df.copy()
     df_ptak = filtered_df[(filtered_df['nazwa_polska'] == selected_nazwa_polska) &
@@ -34,12 +35,11 @@ def update_map(selected_nazwa_polska, selected_status, selected_rok):
                      (filtered_df['rok_start'] <= selected_rok) &
                      (filtered_df['rok_end'] >= selected_rok)]
     df_ptak = df_ptak[~df_ptak['liczba_par_max'].isna()]
-
+    df_ptak = df_ptak[~df_ptak['liczba_par_min'].isna()]
 
     if selected_nazwa_polska:
         filtered_df = filtered_df[filtered_df['nazwa_polska'].isin([selected_nazwa_polska])]
 
-    print(filtered_df)
 
     fig = go.Figure()
     # Add points from example_df
@@ -49,7 +49,7 @@ def update_map(selected_nazwa_polska, selected_status, selected_rok):
         mode='markers',
         marker=go.scattermapbox.Marker(
             size=15,
-            color=df_ptak['liczba_par_max'],
+            color=df_ptak[selected_mod],
             colorscale='Viridis',
             showscale=True
         ),
@@ -87,7 +87,7 @@ def update_table_map(selected_nazwa_polska, selected_status, selected_rok):
         return html.Div([
             html.H2("Wyniki filtrowania:"),
             dash.dash_table.DataTable(
-                data=filtered_df.to_dict('records'),
+                data=df_ptak.to_dict('records'),
                 # Show first 13 columns, skip rok_poczatek i rok_end
                 columns=[{'name': i, 'id': i} for i in df_ptak.columns[:13]],
                 style_table={'overflowX': 'auto'},

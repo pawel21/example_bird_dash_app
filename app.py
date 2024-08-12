@@ -91,40 +91,75 @@ plot_layout = html.Div([
 map_layout = html.Div(
     style={
         'display': 'flex',
-        'justify-content': 'center',
+        'flex-direction': 'column',
         'align-items': 'center',
         'height': '100vh',
-        'padding': 20, 'flex': 20,
-        'flex-direction': 'column'
+        'padding': 20
     },
-    children = [
+    children=[
         html.H1("Mapa"),
-
-        html.Label('Wybierz nazwę ptaka:'),
-        dcc.Dropdown(
-            id='nazwa_polska_map',
-            options=[{'label': i, 'value': i} for i in df_mapa_test['nazwa_polska'].unique()],
-            style={'width': '60%', 'margin': '5px auto'}
+        html.Div(
+            style={
+                'display': 'flex',
+                'justify-content': 'center',
+                'align-items': 'center',
+                'width': '100%',
+                'margin-bottom': '20px'
+            },
+            children=[
+                html.Div(
+                    style={'margin': '0 10px'},
+                    children=[
+                        html.Label('Wybierz nazwę ptaka:'),
+                        dcc.Dropdown(
+                            id='nazwa_polska_map',
+                            options=[{'label': i, 'value': i} for i in df_mapa_test['nazwa_polska'].unique()],
+                            style={'width': '200px'}
+                        )
+                    ]
+                ),
+                html.Div(
+                    style={'margin': '0 10px'},
+                    children=[
+                        html.Label('Wybierz status:'),
+                        dcc.Dropdown(
+                            id='status_map',
+                            options=[{'label': i, 'value': i} for i in df_mapa_test['status'].unique()],
+                            style={'width': '200px'}
+                        )
+                    ]
+                ),
+                html.Div(
+                    style={'margin': '0 10px'},
+                    children=[
+                        html.Label('Wybierz rok:'),
+                        dcc.Dropdown(
+                            id='rok_map',
+                            options=[i for i in range(1990, 2020)],
+                            style={'width': '200px'}
+                        )
+                    ]
+                ),
+                html.Div(
+                    style={'margin': '0 10px'},
+                    children=[
+                        html.Label('Wybierz liczbę:'),
+                        dcc.Dropdown(
+                            id='mod_map',
+                            options=['liczba_par_min', 'liczba_par_max'],
+                            value='liczba_par_min',
+                            style={'width': '200px'}
+                        )
+                    ]
+                )
+            ]
         ),
-        html.Label('Wybierz status:'),
-        dcc.Dropdown(
-            id='status_map',
-            options=[{'label': i, 'value': i} for i in df_mapa_test['status'].unique()],
-            style={'width': '60%', 'margin': '5px auto'}
-        ),
-        html.Label('Wybierz rok:'),
-        dcc.Dropdown(
-            id='rok_map',
-            options=[i for i in range(1990, 2020)],
-            style={'width': '60%', 'margin': '5px auto'}
-        ),
-        dcc.Graph(id='map-graph',
-                 style={'width': '60%', 'height': '50vh'}),
+        dcc.Graph(id='map-graph', style={'width': '60%', 'height': '50vh'}),
         html.Br(),
-        html.Div(id='tabela_mapa',
-                  style={'width': '60%', 'height': '25vh', 'overflowY': 'scroll', 'margin': '10px auto'}),
+        html.Div(id='tabela_mapa', style={'width': '60%', 'height': '25vh', 'overflowY': 'scroll', 'margin': '10px auto'}),
         dcc.Link('Powrót do menu', href='/')
-])
+    ]
+)
 
 @app.callback(
     Output('nazwa_polska_dropdown_bar_plot', 'options'),
