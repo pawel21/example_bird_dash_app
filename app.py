@@ -114,7 +114,8 @@ map_layout = html.Div(
                         dcc.Dropdown(
                             id='nazwa_polska_map',
                             options=[{'label': i, 'value': i} for i in df_mapa_test['nazwa_polska'].unique()],
-                            style={'width': '200px'}
+                            style={'width': '200px'},
+                            value="bielik"
                         )
                     ]
                 ),
@@ -124,7 +125,6 @@ map_layout = html.Div(
                         html.Label('Wybierz status:'),
                         dcc.Dropdown(
                             id='status_map',
-                            options=[{'label': i, 'value': i} for i in df_mapa_test['status'].unique()],
                             style={'width': '200px'}
                         )
                     ]
@@ -264,6 +264,21 @@ def update_table(selected_nazwa_ostoi, selected_nazwa_polska, selected_rok):
             }
         )
     ])
+
+
+@app.callback(
+    Output('status_map', 'options'),
+    Input('nazwa_polska_map', 'value')
+)
+def update_dropdown_status_ptaka_wykres(selected_nazwa_polska):
+    # Filtruj DataFrame na podstawie wybranej wartości
+    filtered_df = df_mapa_test[df_mapa_test['nazwa_polska'] == selected_nazwa_polska]
+
+    # Tworzenie listy unikalnych wartości i przekształcenie ich w format słownikowy dla opcji dropdown
+    options = [{'label': i, 'value': i} for i in filtered_df['status'].unique()]
+
+    return options
+
 
 
 
