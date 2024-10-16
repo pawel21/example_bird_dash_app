@@ -7,7 +7,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 from maps import update_map
-
+from form import form_layout
 
 # Establish a connection to the SQLite database
 conn = sqlite3.connect('database_kryteria_after_preprocesing.db')
@@ -37,6 +37,8 @@ menu_layout = html.Div([
     html.Br(),
     dcc.Link('Mapa', href='/map'),
     dcc.Location(id='url', refresh=False),
+    html.Br(),
+    dcc.Link('Formularz', href='/form'),
     html.Div(id='page-content')
 ])
 
@@ -193,6 +195,8 @@ def display_page(pathname):
         return plot_layout
     elif pathname == '/map':
         return map_layout
+    elif pathname == "/form":
+        return form_layout
     else:
         return html.Div("Wybierz stronę z menu powyżej.")
 
