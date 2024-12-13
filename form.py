@@ -4,22 +4,35 @@ from dash import callback
 import dash.dash_table as dt
 import pandas as pd
 import os
+import json
 
+with open("nazwy_IBA.json", "r") as f:
+    IBA_NAZWY = json.load(f)
+
+NAZWY_OSTOI_LISTA  = IBA_NAZWY['Nazwy ostoi']
 # Strona z formularzem
 form_layout =  html.Div([
     html.H2('Formularz', style={'text-align': 'center', 'margin-bottom': '30px'}),
     html.Div([
         html.Label('Nazwa ostoi:', style={'display': 'block', 'margin-bottom': '10px'}),
-        dcc.Input(id='input-nazwa-ostoi', type='text', placeholder='Wpisz nazwę ostoi',
-                  style={'width': '300px', 'height': '40px', 'font-size': '18px', 'margin-bottom': '20px'}),
+        dcc.Dropdown(
+            id="input-nazwa-ostoi",
+            options=NAZWY_OSTOI_LISTA,
+            placeholder="Wybierz opcję",
+            style={'width': '300px', 'height': '40px', 'font-size': '18px', 'margin-bottom': '20px'}
+        ),
         html.Br(),
         html.Label('Nazwa polska:', style={'display': 'block', 'margin-bottom': '10px'}),
         dcc.Input(id='input-nazwa-polska', type='text', placeholder='Wpisz nazwę polską',
                   style={'width': '300px', 'height': '40px', 'font-size': '18px', 'margin-bottom': '20px'}),
         html.Br(),
         html.Label('Status:', style={'display': 'block', 'margin-bottom': '10px'}),
-        dcc.Input(id='input-status', type='text', placeholder='Wpisz status',
-                  style={'width': '300px', 'height': '40px', 'font-size': '18px', 'margin-bottom': '20px'}),
+        dcc.Dropdown(
+            id="input-status",
+            options=["L", "M"],
+            placeholder="Wybierz opcję",
+            style={'width': '300px', 'height': '40px', 'font-size': '18px', 'margin-bottom': '20px'}
+        ),
         html.Br(),
         html.Label('Liczba par (min):', style={'display': 'block', 'margin-bottom': '10px'}),
         dcc.Input(id='input-liczba-par-min', type='number', placeholder='Wpisz liczbę par minimalną',
