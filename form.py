@@ -10,6 +10,7 @@ with open("nazwy_IBA.json", "r") as f:
     IBA_NAZWY = json.load(f)
 
 NAZWY_OSTOI_LISTA  = IBA_NAZWY['Nazwy ostoi']
+NAZWY_POLSKIE = IBA_NAZWY['Nazwy polskie']
 # Strona z formularzem
 form_layout =  html.Div([
     html.H2('Formularz', style={'text-align': 'center', 'margin-bottom': '30px'}),
@@ -23,8 +24,14 @@ form_layout =  html.Div([
         ),
         html.Br(),
         html.Label('Nazwa polska:', style={'display': 'block', 'margin-bottom': '10px'}),
-        dcc.Input(id='input-nazwa-polska', type='text', placeholder='Wpisz nazwę polską',
-                  style={'width': '300px', 'height': '40px', 'font-size': '18px', 'margin-bottom': '20px'}),
+        #dcc.Input(id='input-nazwa-polska', type='text', placeholder='Wpisz nazwę polską',
+        #          style={'width': '300px', 'height': '40px', 'font-size': '18px', 'margin-bottom': '20px'}),
+        dcc.Dropdown(
+            id="input-nazwa-polska",
+            options=NAZWY_POLSKIE,
+            placeholder="Wybierz opcję",
+            style={'width': '300px', 'height': '40px', 'font-size': '18px', 'margin-bottom': '20px'}
+        ),
         html.Br(),
         html.Label('Status:', style={'display': 'block', 'margin-bottom': '10px'}),
         dcc.Dropdown(
@@ -43,8 +50,12 @@ form_layout =  html.Div([
                   style={'width': '300px', 'height': '40px', 'font-size': '18px', 'margin-bottom': '20px'}),
         html.Br(),
         html.Label('Dokładność oszacowania:', style={'display': 'block', 'margin-bottom': '10px'}),
-        dcc.Input(id='input-dokladnosc-oszac', type='text', placeholder='Wpisz dokładność oszacowania',
-                  style={'width': '300px', 'height': '40px', 'font-size': '18px', 'margin-bottom': '20px'}),
+        dcc.Dropdown(
+            id="input-dokladnosc-oszac",
+            options=["dokładne liczenie", "przyblizony szacunek", "ekstrapolacja"],
+            placeholder="Wybierz opcję",
+            style={'width': '300px', 'height': '40px', 'font-size': '18px', 'margin-bottom': '20px'}
+        ),
         html.Br(),
         html.Label('Rok:', style={'display': 'block', 'margin-bottom': '10px'}),
         dcc.Input(id='input-rok', type='number', placeholder='Wpisz rok',
