@@ -64,14 +64,6 @@ table_layout = html.Div([
         multi=True
     ),
     html.Br(),
-    html.Label("Wybierz rok:"),
-    dcc.Dropdown(
-        id='rok_dropdown',
-        options=[i for i in range(1990, 2020)],
-        multi=True
-    ),
-    html.Br(),
-    # TO DO add in table filter
     html.Label("Wybierz rok poczatkowy:"),
     dcc.Dropdown(
         id='rok_start',
@@ -290,9 +282,10 @@ def update_bar(selected_nazwa_ostoi, selected_nazwa_polska, selected_status):
     Output('tabela_div', 'children'),
     [Input('nazwa_ostoi_dropdown', 'value'),
      Input('nazwa_polska_dropdown', 'value'),
-     Input('rok_dropdown', 'value')]
+     Input('rok_start', 'value'),
+     Input('rok_end', 'value')]
 )
-def update_table(selected_nazwa_ostoi, selected_nazwa_polska, selected_rok):
+def update_table(selected_nazwa_ostoi, selected_nazwa_polska, selected_rok_start, selected_rok_end):
     filtered_df = df.copy()
     if selected_nazwa_ostoi:
         filtered_df = filtered_df[filtered_df['nazwa_ostoi'].isin(selected_nazwa_ostoi)]
@@ -300,10 +293,10 @@ def update_table(selected_nazwa_ostoi, selected_nazwa_polska, selected_rok):
     if selected_nazwa_polska:
         filtered_df = filtered_df[filtered_df['nazwa_polska'].isin(selected_nazwa_polska)]
 
-    if selected_rok:
-        filtered_df = filtered_df[filtered_df.apply(
-        lambda row: any((row['rok_start'] <= year) &
-        (row['rok_end'] >= year) for year in selected_rok), axis=1)]
+    if selected_rok_start and selected_rok_end:
+        filtered_df = filtered_df[
+            (filtered_df['rok_start'] >= selected_rok_start) &
+            (filtered_df['rok_end'] <= selected_rok_end)]
 
     return html.Div([
         html.H2("Wyniki filtrowania:"),
