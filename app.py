@@ -1,5 +1,5 @@
 import dash
-from dash import html, dcc
+from dash import html, dcc, dash_table
 from dash.dependencies import Input, Output
 import pandas as pd
 import sqlite3
@@ -13,8 +13,9 @@ from form import form_layout
 conn = sqlite3.connect('database_kryteria_after_preprocesing.db')
 
 # Read the entire table into a DataFrame
-df= pd.read_sql_query("SELECT * FROM kryteria", conn)
+df = pd.read_sql_query("SELECT * FROM kryteria", conn)
 df_mapa_test = pd.read_csv("mapa_test_IBA.csv")
+
 
 # Close the connection
 conn.close()
@@ -30,15 +31,19 @@ app.config.suppress_callback_exceptions=True
 menu_layout = html.Div([
     html.H1("IBA baza danych"),
     #html.Label("Wybierz stronę:"),
+    html.Div([
+        dcc.Link('Tabela', href='/table'),
+        html.Br(),
+        dcc.Link('Wykres', href='/plot'),
+        html.Br(),
+        dcc.Link('Mapa', href='/map'),
+        html.Br(),
+        dcc.Link('Formularz', href='/form'),
+        html.Br(),
+        dcc.Link('Nowe dane', href='/new_data'),
+    ], style={"display":'flex', 'gap':'10px'}),
     html.Br(),
-    dcc.Link('Tabela', href='/table'),
-    html.Br(),
-    dcc.Link('Wykres', href='/plot'),
-    html.Br(),
-    dcc.Link('Mapa', href='/map'),
-    dcc.Location(id='url', refresh=False),
-    html.Br(),
-    dcc.Link('Formularz', href='/form'),
+    dcc.Location(id="url", refresh=False),
     html.Div(id='page-content')
 ])
 
@@ -59,15 +64,31 @@ table_layout = html.Div([
         multi=True
     ),
     html.Br(),
-    html.Label("Wybierz nazwę polską:"),
+    html.Label("Wybierz rok:"),
     dcc.Dropdown(
         id='rok_dropdown',
         options=[i for i in range(1990, 2020)],
         multi=True
     ),
+    html.Br(),
+    # TO DO add in table filter
+    html.Label("Wybierz rok poczatkowy:"),
+    dcc.Dropdown(
+        id='rok_start',
+        options=[i for i in range(1990, 2025)],
+        multi=False
+    ),
+    html.Br(),
+    html.Label("Wybierz rok końcowy:"),
+    dcc.Dropdown(
+        id='rok_end',
+        options=[i for i in range(1990, 2025)],
+        multi=False
+    ),
     html.Div(id='tabela_div'),
     dcc.Link('Powrót do menu', href='/')
 ])
+
 
 # Layout for the plot page
 plot_layout = html.Div([
@@ -163,6 +184,37 @@ map_layout = html.Div(
     ]
 )
 
+# Layout for the new data page
+# Define the layout for the new_data page
+new_data_layout = html.Div([
+    dcc.Location(id='url_new_data', refresh=False),  # Detect page load
+    html.H1("Tabela"),
+    html.Br(),
+
+    html.H2("Wyniki filtrowania:"),
+    dash_table.DataTable(id='data-table',  # Table with dynamic data
+                         style_table={'width': '80%', 'margin': 'auto'},
+                         style_cell={'textAlign': 'center', 'padding': '10px'},
+                         style_header={'backgroundColor': 'lightgrey', 'fontWeight': 'bold'}
+                         ),
+    dcc.Link('Powrót do menu', href='/')
+])
+
+@app.callback(
+    Output('data-table', 'data'),
+    Output('data-table', 'columns'),
+    Input('url_new_data', 'pathname')  # Trigger when the user navigates to the page
+)
+def load_data(pathname):
+    if pathname == "/new_data":  # Ensure it runs only when entering this page
+        try:
+            df_all = pd.read_csv('formularz_dane.csv')
+            columns = [{"name": i, "id": i} for i in df_all.columns]
+            return df_all.to_dict('records'), columns
+        except Exception as e:
+            return [], []  # Return empty data if file not found
+    return dash.no_update, dash.no_update  # Do nothing if not on this page
+
 @app.callback(
     Output('nazwa_polska_dropdown_bar_plot', 'options'),
     Input('nazwa_ostoi_dropdown_bar_plot', 'value')
@@ -197,6 +249,8 @@ def display_page(pathname):
         return map_layout
     elif pathname == "/form":
         return form_layout
+    elif pathname == "/new_data":
+        return new_data_layout
     else:
         return html.Div("Wybierz stronę z menu powyżej.")
 
